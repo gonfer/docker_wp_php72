@@ -6,7 +6,7 @@ LABEL maintainer="gonzalo4@gmail.com"
 RUN rm /etc/apt/preferences.d/no-debian-php \
   && apt-get update -y \
   && apt-get upgrade -y \
-  && apt-get install -y --no-install-recommends \
+  && apt-get install -y --no-install-recommends apt-utils \
      libxml2-dev \
      php7.0-soap \
      php-pear \
@@ -27,8 +27,20 @@ RUN pecl install xdebug \
   && echo "xdebug.profiler_enable = 0" >> /usr/local/etc/php/conf.d/xdebug.ini \
   && echo "xdebug.remote_host = 192.168.1.4" >> /usr/local/etc/php/conf.d/xdebug.ini
 
+# VIM
+RUN apt-get install -y vim
+
 # Memcached
-RUN apt-get install -y memcached libmemcached-dev
+RUN apt-get install -q -y zlib1g-dev libmemcachedutil2 libmemcached-dev
+
+# Install memcached (manualy build)
+RUN for i in $(seq 1 3); do echo no | pecl install -o --nobuild memcached && s=0 && break || s=$? && sleep 1; done; (exit $s) \
+    && cd "$(pecl config-get temp_dir)/memcached" \
+    && phpize \
+    && ./configure \
+    && make \
+    && make install \
+    && docker-php-ext-enable memcached
 
 # Delete source & builds deps so it does not hang around in layers taking up space
 RUN pecl clear-cache \
