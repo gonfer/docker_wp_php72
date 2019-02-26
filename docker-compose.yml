@@ -6,8 +6,8 @@ services:
   wordpress:
     container_name: cont_wordp_php72 # name of our wordpress container
     ports:
-      - "80:80" # setting our ports for networking
-      - "9000:9000" # for xdebug
+      - "8080:80" # setting our ports for networking
+      - "9001:9000" # for xdebug
     restart: always
     build:
       context: .
